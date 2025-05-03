@@ -1,6 +1,9 @@
 import React from 'react';
+import Swal from 'sweetalert2';
+import UseAuth from './Hook/UseAuth';
 
 const AddJob = () => {
+    const { user } = UseAuth()
 
     const handleAddJob = e => {
         e.preventDefault();
@@ -9,8 +12,34 @@ const AddJob = () => {
         console.log(initialData);
 
         const {min, max, currency, ...newJob} = initialData;
-        console.log(newJob);
         newJob.salaryRange = {min, max, currency}
+        newJob.requirements = newJob.requirements.split('\n');
+        newJob.responsibilities = newJob.responsibilities.split('\n');
+        console.log(newJob);
+        
+
+        //after receiving formdata, now we have to work on back-end
+        // 1st: fetch data
+        fetch('http://localhost:5000/jobs', {
+            method: 'POST',
+            headers: {
+                'content-type':'application/json'
+            },
+            body: JSON.stringify(newJob)
+        })
+        .then( res => res.json())
+        .then( data => {
+            if(data.insertedId){
+                Swal.fire({
+                    position: "top-end",
+                    icon: "success",
+                    title: "Your job has been applied",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+                navigate('/myApplications')
+                }
+        })
     }
     return (
         <div className='text-center mx-auto w-10/12'>
@@ -23,7 +52,7 @@ const AddJob = () => {
                 
                 {/* Job Category */}
                 <label className="label">Job Type</label>
-                <select defaultValue="Pick a font" className="select select-ghost">
+                <select defaultValue="pick a job" name="job_type" className="select select-ghost">
                     <option disabled={true}>Pick a Job type</option>
                     <option>Full-time</option>
                     <option>Intern</option>
@@ -31,7 +60,7 @@ const AddJob = () => {
                 </select>
                 {/* Job Category */}
                 <label className="label">Job Type</label>
-                <select defaultValue="Pick a font" className="select select-ghost">
+                <select defaultValue="pick a job" name="category" className="select select-ghost">
                     <option disabled={true}>Pick a Job type</option>
                     <option>Engineering</option>
                     <option>Marketing</option>
@@ -46,7 +75,7 @@ const AddJob = () => {
                 {/* max */}
                 <input type="text" name='max' className="input input-bordered" placeholder="max" />
                 {/* Currency */}
-                <select name='currency' defaultValue="Pick a font" className="select select-ghost">
+                <select defaultValue="pick a currency" name='currency' className="select select-ghost">
                     <option disabled={true}>Pick a Currency</option>
                     <option>BDT</option>
                     <option>USD</option>
@@ -58,9 +87,9 @@ const AddJob = () => {
                 <textarea className='textarea textarea-bordered' placeholder='Job Description' name="description" id=""></textarea>
                 {/* Company Name */}
                 <label className="label">Company name</label>
-                <input type="text" name='Company' className="input" placeholder="Company name" />
+                <input type="text" name='company' className="input" placeholder="Company name" />
                 {/* Job Requirements */}
-                <label className="label">Job Description</label>
+                <label className="label">Job Requirements</label>
                 <textarea className='textarea textarea-bordered' placeholder='Put each requirements on new line' name="requirements" id=""></textarea>
                 {/* Responsibilities  */}
                 <label className="label">Job Responsibilities</label>
@@ -70,7 +99,7 @@ const AddJob = () => {
                 <input type="text" name='hr_name' className="input" placeholder="HR name" />
                  {/* HR email */}
                  <label className="label">HR email</label>
-                <input type="text" name='hr_email' className="input" placeholder="HR email" />
+                <input defaultValue={user?.email} type="text" name='hr_email' className="input" placeholder="HR email" />
                  {/* Company Logo URL*/}
                  <label className="label">Company Logo URL</label>
                 <input type="text" name='company_logo' className="input" placeholder="Company Logo URL" />

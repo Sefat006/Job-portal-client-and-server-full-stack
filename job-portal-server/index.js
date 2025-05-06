@@ -100,10 +100,23 @@ async function run() {
     app.post('/job-applications', async(req, res) => {
       const application = req.body;
       const result = await jobApplicationCollection.insertOne(application);
-
-      
       res.send(result);
+    })
 
+    // We use the PATCH method when we want to update **part** of a resource (not the entire thing).
+    // In this case, we only want to update the 'status'
+    // go to viewDetails page
+    app.patch('/job-application/:id', async (req, res) => {
+      const id = req.params.id;
+      const data = req.body;// This gets the data sent from the frontend
+      const filter = {_id: new ObjectId(id)};
+      const updatedDoc = {
+        $set: {
+          status: data.status
+        }
+      }
+      const result = await jobApplicationCollection.updateOne(filter, updatedDoc);
+      res.send(result);
     })
 
   } finally {

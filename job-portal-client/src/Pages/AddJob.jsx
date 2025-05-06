@@ -1,9 +1,11 @@
 import React from 'react';
 import Swal from 'sweetalert2';
 import UseAuth from './Hook/UseAuth';
+import { useNavigate } from 'react-router';
 
 const AddJob = () => {
     const { user } = UseAuth()
+    const navigate = useNavigate();
 
     const handleAddJob = e => {
         e.preventDefault();
@@ -37,7 +39,7 @@ const AddJob = () => {
                     showConfirmButton: false,
                     timer: 1500
                 });
-                navigate('/myApplications')
+                navigate('/myPostedJobs')
                 }
         })
     }
@@ -99,7 +101,10 @@ const AddJob = () => {
                 <input type="text" name='hr_name' className="input" placeholder="HR name" />
                  {/* HR email */}
                  <label className="label">HR email</label>
-                <input defaultValue={user?.email} type="text" name='hr_email' className="input" placeholder="HR email" />
+                <input defaultValue={user?.email} readOnly type="text" name='hr_email' className="input" placeholder="HR email" />
+                 {/* Application Deadline */}
+                 <label className="label">Application Deadline</label>
+                <input type="date" name='applicationDeadline' className="input" placeholder="Application Deadline" />
                  {/* Company Logo URL*/}
                  <label className="label">Company Logo URL</label>
                 <input type="text" name='company_logo' className="input" placeholder="Company Logo URL" />

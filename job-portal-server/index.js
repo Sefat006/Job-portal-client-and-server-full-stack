@@ -37,7 +37,15 @@ async function run() {
 
     //jobs related APIs
     app.get('/jobs', async(req, res) => {
-        const cursor = jobsCollection.find();
+        // this part will show the posted job application
+        // according to person email
+        const email = req.query.email;
+        let query = {};
+        if(email){
+          query = {hr_email: email}
+        }
+        // then find(query) and end of the specific part
+        const cursor = jobsCollection.find(query);
         const result = await cursor.toArray();
         res.send(result);
     })
@@ -82,9 +90,18 @@ async function run() {
       res.send(result);
     })
     
+    app.get('/job-applications/jobs/:job_id', async (req, res) => {
+      const jobId = req.params.job_id; // used in all /:id related path
+      const query = { job_id: jobId }
+      const result = await jobApplicationCollection.find(query).toArray();
+      res.send(result);
+    })
+
     app.post('/job-applications', async(req, res) => {
       const application = req.body;
       const result = await jobApplicationCollection.insertOne(application);
+
+      
       res.send(result);
 
     })

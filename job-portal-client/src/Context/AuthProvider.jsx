@@ -1,51 +1,64 @@
 import React, { useEffect, useState } from 'react';
 import AuthContext from './AuthContext';
-import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
+
+// Firebase imports
+import {
+    createUserWithEmailAndPassword,
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    signOut
+} from "firebase/auth";
 import auth from '../Firebase/firebase.init';
 import { GoogleAuthProvider } from "firebase/auth";
-import { setLogLevel } from 'firebase/app';
 
+// Create Google sign-in provider instance
 const googleProvider = new GoogleAuthProvider();
 
 const AuthProvider = ({ children }) => {
-
+    // 🔐 Stores logged-in user
     const [user, setUser] = useState(null);
+
+    // 🕐 Tracks loading state during auth operations
     const [loading, setLoading] = useState(true);
 
+    // ✅ Register user with email + password
     const createUser = (email, password) => {
         setLoading(true);
         return createUserWithEmailAndPassword(auth, email, password);
-    }
+    };
 
+    // 🔑 Sign in existing user (email + password)
     const signInUser = (email, password) => {
         setLoading(true);
         return signInWithEmailAndPassword(auth, email, password);
-    }
+    };
 
+    // 🌐 Sign in with Google popup
     const signInWithGoogle = () => {
         setLoading(true);
         return signInWithPopup(auth, googleProvider);
-    }
+    };
 
+    // 🚪 Sign out current user
     const signOutUser = () => {
         setLoading(true);
         return signOut(auth);
-    }
+    };
 
-    //auth observer
-    // this is after createUser
-    useEffect( ()=> {
+    // 👀 Auth state observer — runs on mount
+    useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, currentUser => {
-            setUser(currentUser);
-            setLoading(false);
+            setUser(currentUser);       // set user data if signed in
+            setLoading(false);          // done loading
             console.log('auth captured', currentUser);
-        })
+        });
 
-        return () => {
-            unsubscribe();
-        }
-    })
+        // 🔄 Cleanup listener when component unmounts
+        return () => unsubscribe();
+    }, []);
 
+    // 🧠 Combine everything into one object to share via Context
     const authInfo = {
         user,
         loading,
@@ -53,9 +66,9 @@ const AuthProvider = ({ children }) => {
         signInUser,
         signOutUser,
         signInWithGoogle,
-        
-    }
+    };
 
+    // 📤 Share authInfo with entire app
     return (
         <AuthContext.Provider value={authInfo}>
             {children}

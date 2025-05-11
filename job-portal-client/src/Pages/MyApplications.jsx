@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import UseAuth from './Hook/UseAuth';
+import axios from 'axios';
 
 const MyApplications = () => {
 
@@ -7,9 +8,15 @@ const MyApplications = () => {
     const [jobs, setJobs] = useState([]);
 
     useEffect(() => {
-        fetch(`http://localhost:5000/job-application?email=${user.email}`)
-        .then(res => res.json())
-        .then(data => setJobs(data))
+        // fetch(`http://localhost:5000/job-application?email=${user.email}`)
+        // .then(res => res.json())
+        // .then(data => setJobs(data))
+
+        // jwt token step - 3: use axios.get instead of fetch()
+        axios.get(`http://localhost:5000/job-application?email=${user.email}`,
+          { withCredentials: true }
+        )
+        .then( res => res.data)
     }, [user.email])
     return (
         <div className="overflow-x-auto">

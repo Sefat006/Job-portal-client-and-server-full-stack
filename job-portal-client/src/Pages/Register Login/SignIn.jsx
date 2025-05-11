@@ -4,11 +4,12 @@ import loginLottieData from '../../assets/login.json'
 import AuthContext from '../../Context/AuthContext';
 import { Link, useLocation, useNavigate } from 'react-router';
 import SocialLogin from './SocialLogin';
+import axios from 'axios';
 
 const SignIn = () => {
     const {signInUser} = useContext(AuthContext);
     const location = useLocation();
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     console.log('in sign in page ',location);
     const from = location.state || '/';
 
@@ -21,8 +22,17 @@ const SignIn = () => {
 
         signInUser(email, password)
         .then(result => {
-            console.log("sign In", result.user)
-            navigate(from);
+            console.log("sign In", result.user.email)
+
+            // jwt token step - 2: withCredentials: true
+            const user = {email : result.user.email}
+            axios.post('http://localhost:5000/jwt', user, {
+              withCredentials: true,
+            }) // jwt token step-3 : goto MyApplications.jsx
+            .then(res => {
+              console.log(res.data);
+            })
+            // navigate(from);
         })
         .catch(error => {
             console.log(error)

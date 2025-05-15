@@ -9,30 +9,24 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // middleware
 app.use(cors({
-  origin: ['http://localhost:5173'],
-  credentials : true,
+    origin: ['http://localhost:5173'],
+    credentials: true
 }));
 app.use(express.json());
 app.use(cookieParser());
 
-
-const logger = (req, res, next) => {
-  console.log('inside the logger');
-  next();
-}
-
 const verifyToken = (req, res, next) => {
-  console.log('inside verify token middleware')
-  const token = req?.cookies?.token;
-
+  const token = req.cookies?.token;
+  
   if(!token){
-    return res.status(401).send({message: 'unauthorized access'})
+    return res.status(401).send({message: 'unAuthorized access'});
   }
+
+  //varify the token
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if(err){
-      return res.status(401).send({message: 'Unauthorized access'})
+      return res.status(401).send({message: 'unAuthorized access'});
     }
-    req.user = decoded;
     next();
   })
   
@@ -62,22 +56,27 @@ async function run() {
     const jobApplicationCollection = client.db('JobPortal').collection('job_applications');
 
     // Auth related API's
-    app.post('/jwt', async (req, res) => {
-      const user = req.body;
-      const token = jwt.sign(
-        user,
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '5h'}
-      );
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: false, // http://localhost:5173/signIn
-      })
-        .send({success: true});
+    // token create
+    app.post('/jwt', (req, res) => {
+        const user = req.body;
+        const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+            expiresIn: '5h'})
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: false,
+            }).send({success: true})
+    })
+
+    //token remove
+    app.post('/logout', (req, res) => {
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: false
+        }).send({success: true})
     })
 
     //jobs related APIs
-    app.get('/jobs',logger, async(req, res) => {
+    app.get('/jobs', async(req, res) => {
         // this part will show the posted job application
         // according to person email
         const email = req.query.email;
@@ -88,7 +87,9 @@ async function run() {
         // then find(query) and end of the specific part
         const cursor = jobsCollection.find(query);
         const result = await cursor.toArray();
-        res.send(result);
+        // Ensure 'requirements' is always an array
+        const filteredJobs = result.filter(job => Array.isArray(job.requirements));
+        res.send(filteredJobs);
     })
 
     // 1. goto router.jsx and declare a loader path for job details
@@ -109,13 +110,14 @@ async function run() {
 
     //job application apis
     //get all data, get one data, get some data [0, 1, many]
-    app.get('/job-application',verifyToken, async (req, res) => {
+    app.get('/job-application', verifyToken, async (req, res) => {
       const email = req.query.email;
       const query = { applicant_email: email }
-      if( req.user.email !== req.query.email){
-        return req.status(403).send({
-          message: 'forbidden access'
-        })
+
+      console.log(req.cookies?.token);
+      //token email !== query email
+      if(req.user.email !== req.query.email){
+        return res.status(403).send({message: 'forbidden access'});
       }
       const result = await jobApplicationCollection.find(query).toArray();
 
@@ -171,8 +173,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
-
 
 app.get('/', (req, res) => {
     res.send('Job is falling from the sky');

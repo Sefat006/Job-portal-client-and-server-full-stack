@@ -1,13 +1,8 @@
-# module 58
-# job portal
-# creating a practical full webpage 
-## 🚀 Tech Stack
+# React + Vite
 
-This project uses the following main packages:
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-- [React Router v7](https://reactrouter.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [DaisyUI](https://daisyui.com/) — Tailwind CSS component library
-- [Firebase](https://firebase.google.com/) — for authentication and backend services
-- [LottieFiles (react-lottie)](https://www.lottiefiles.com/) — for animations
-- [React Motion](https://https://motion.dev) — for smooth animations
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh

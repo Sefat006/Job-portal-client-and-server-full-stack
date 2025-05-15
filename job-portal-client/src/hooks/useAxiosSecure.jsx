@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 const axiosInstance = axios.create({
-    baseURL : 'http://localhost:5000',
+    baseURL : 'https://job-portal-server-snowy-psi.vercel.app',
     withCredentials: true,
 })
 const useAxiosSecure = () => {
@@ -35,6 +35,8 @@ const useAxiosSecure = () => {
             return Promise.reject(error);
         })
     }, [])
+
+    return [axiosInstance];
 };
 
 export default useAxiosSecure;

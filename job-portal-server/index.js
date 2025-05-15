@@ -8,10 +8,23 @@ const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // middleware
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://job-portal-605c1.web.app',
+  'https://job-portal-605c1.firebaseapp.com'
+];
+
 app.use(cors({
-    origin: ['http://localhost:5173'],
-    credentials: true
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
 }));
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -27,6 +40,8 @@ const verifyToken = (req, res, next) => {
     if(err){
       return res.status(401).send({message: 'unAuthorized access'});
     }
+
+    req.user = decoded;
     next();
   })
   
@@ -46,10 +61,10 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
     // jobs related apis
     const jobsCollection = client.db('JobPortal').collection('jobs');
@@ -63,7 +78,7 @@ async function run() {
             expiresIn: '5h'})
             res.cookie('token', token, {
                 httpOnly: true,
-                secure: false,
+                secure: process.env.NODE_ENV=== 'production',
             }).send({success: true})
     })
 
@@ -71,7 +86,7 @@ async function run() {
     app.post('/logout', (req, res) => {
         res.clearCookie('token', {
             httpOnly: true,
-            secure: false
+            secure: process.env.NODE_ENV=== 'production'
         }).send({success: true})
     })
 
